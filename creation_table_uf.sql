@@ -46,7 +46,7 @@ CREATE INDEX pnb_uf_2013_geompar_idx
   USING gist
   (geom);
 
--- suppression des inclusions
+-- suppression des inclusions (méthode non optimale)
 delete from fd94.pnb_uf_2013
 where geom in (
 	select p2.geom
@@ -65,6 +65,16 @@ where idpar in (
 ALTER TABLE fd94.pnb_uf_2013 ADD PRIMARY KEY (idpar);
 
 CREATE INDEX pnb_uf_2013_idpar_idx ON fd94.pnb_uf_2013 (idpar);
+
+-- création du champ idprocpte
+alter table fd94.pnb_uf_2013
+add column idprocpte varchar(11);
+
+-- maj du champ idprocpte
+update fd94.pnb_uf_2013 u
+set idprocpte=p.idprocpte
+from fd94.pnb_par_2013 p
+where u.idpar=p.idpar;
 
 
 -- creation de colonnes caractérisant l'usage en 4, 8 et 16 classes
