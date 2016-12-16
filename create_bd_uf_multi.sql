@@ -1,6 +1,7 @@
-﻿-- créations des tables multimillésimes des UF et parcelles
+﻿-- créations des tables multimillésimes des UF et parcelles à partir du millésime 2014
 -- contient les UF et parcelles de tous les millésimes
 
+drop table if exists fd94.pnb_uf_multi;
 create table fd94.pnb_uf_multi as
 	select *
 	from fd94.pnb_uf_2014;
@@ -12,7 +13,7 @@ CREATE INDEX pnb_uf_multi_geom_idx
 alter table fd94.pnb_uf_multi
 add primary key (iduf, annee);
 
-
+drop table if exists fd94.pnb_par_created;
 create table fd94.pnb_par_created as
 	select idpar, 2014
 	from fd94.pnb_par_2014
@@ -21,7 +22,8 @@ create table fd94.pnb_par_created as
 		  except
 		select idpar from fd94.pnb_par_2013
 		);
-		
+
+drop table if exists fd94.pnb_par_destroyed;
 create table fd94.pnb_par_destroyed as
 	select idpar, 2014
 	from fd94.pnb_par_2013
@@ -31,6 +33,7 @@ create table fd94.pnb_par_destroyed as
 		select idpar from fd94.pnb_par_2014
 		);
 
+drop table if exists fd94.pnb_uf_created;
 create table fd94.pnb_uf_created as
 	select iduf, 2014
 	from fd94.pnb_uf_2014
@@ -40,6 +43,7 @@ create table fd94.pnb_uf_created as
 		select iduf from fd94.pnb_uf_2013
 		);
 
+drop table if exists fd94.pnb_uf_destroyed;
 create table fd94.pnb_uf_destroyed as
 	select iduf, 2014
 	from fd94.pnb_uf_2013
