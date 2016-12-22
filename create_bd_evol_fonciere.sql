@@ -171,6 +171,15 @@ from (
 where p.annee=foo.annee and 
 	p.geom=foo.geomp;
 
+----------------------------------------
+-- suppression des tables temporaires --
+----------------------------------------
+drop table fd94.ufc;
+drop table fd94.ufd;
+
+
+
+
 -- -- autre remembrement
 -- update fd94.pnb_per_multi p
 -- set nufe=foo.nufe, nufs=foo.nufs, idufe_l=foo.idufe_l, idufs_l=foo.idufs_l, typetxt='AUTRE',
