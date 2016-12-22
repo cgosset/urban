@@ -38,7 +38,8 @@ create table fd94.usage_per_multi (
 	stotp_ap int,
 	npevd_ap int,
 	stotd_ap int,
-	spevtot_ap int
+	spevtot_ap int,
+	typetxt varchar(10)
 	);
 	
 ---------------------------------------------------------------
@@ -65,7 +66,8 @@ insert into fd94.usage_per_multi (
 	stotp_av ,
 	npevd_av ,
 	stotd_av ,
-	spevtot_av)
+	spevtot_av,
+	typetxt)
 	select
 		p.idper ,
 		p.annee ,
@@ -85,7 +87,8 @@ insert into fd94.usage_per_multi (
 		u.stotp ,
 		u.npevd ,
 		u.stotd ,
-		u.spevtot
+		u.spevtot,
+		'DIV'
 	from fd94.pnb_per_multi p, fd94.pnb_uf_multi u
 	where p.typetxt='DIV' and st_equals(p.geom, u.geom) and
 		p.annee-1=u.annee and
@@ -128,7 +131,7 @@ from (
 	from fd94.pnb_per_multi p, fd94.pnb_uf_multi u
 	where p.typetxt='DIV' and st_contains(p.geom, u.geom) and
 		p.annee=u.annee and
-		u.iduf in (select iduf from fd94.pnb_uf_destroyed)
+		u.iduf in (select iduf from fd94.pnb_uf_created)
 	group by p.geom, p.idper, p.annee
 	) foo
 where p.idper=foo.idper and foo.annee=p.annee;
@@ -153,7 +156,8 @@ insert into fd94.usage_per_multi (
 	stotp_ap ,
 	npevd_ap ,
 	stotd_ap ,
-	spevtot_ap)
+	spevtot_ap,
+	typetxt)
 	select
 		p.idper ,
 		p.annee ,
@@ -173,7 +177,8 @@ insert into fd94.usage_per_multi (
 		u.stotp ,
 		u.npevd ,
 		u.stotd ,
-		u.spevtot
+		u.spevtot,
+		'FUS'
 	from fd94.pnb_per_multi p, fd94.pnb_uf_multi u
 	where p.typetxt='FUS' and st_equals(p.geom, u.geom) and
 		p.annee=u.annee and
@@ -251,7 +256,7 @@ UPDATE fd94.usage_per_multi p
 SET us4_ap=foo.idusage4, us8_ap=foo.idusage8, us16_ap=foo.idusage16
 FROM (
 	SELECT 
-		p1.idper as idper,
+		p1.idper as idper, p1.annee,
 		us1.idusage as idusage4,
 		us2.idusage as idusage8,
 		us3.idusage as idusage16
@@ -265,7 +270,7 @@ FROM (
 		AND c2.c1 + 2*c2.c2 + 4*c2.c4= us2.idusage
 		AND c3.c1 + 2*c3.c2 + 4*c3.c4 + 8*c3.c8 = us3.idusage
 	) AS foo
-WHERE foo.idper=p.idper;
+WHERE foo.idper=p.idper and foo.annee=p.annee;
 
 -- usage avant operation (fusion)
 WITH classe4 AS (
@@ -293,7 +298,7 @@ UPDATE fd94.usage_per_multi p
 SET us4_av=foo.idusage4, us8_av=foo.idusage8, us16_av=foo.idusage16
 FROM (
 	SELECT 
-		p1.idper as idper,
+		p1.idper as idper, p1.annee,
 		us1.idusage as idusage4,
 		us2.idusage as idusage8,
 		us3.idusage as idusage16
@@ -307,7 +312,7 @@ FROM (
 		AND c2.c1 + 2*c2.c2 + 4*c2.c4= us2.idusage
 		AND c3.c1 + 2*c3.c2 + 4*c3.c4 + 8*c3.c8 = us3.idusage
 	) AS foo
-WHERE foo.idper=p.idper;
+WHERE foo.idper=p.idper and foo.annee=p.annee;
 
 
 
