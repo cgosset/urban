@@ -1,6 +1,6 @@
 ﻿-- 1) préparation : duplication temporaire des tables uf creees/detruites
-drop table fd94.ufd;
-drop table fd94.ufc;
+drop table if exists fd94.ufd;
+drop table if exists fd94.ufc;
 create table fd94.ufd as select * from fd94.pnb_uf_destroyed;
 create table fd94.ufc as select * from fd94.pnb_uf_created;
 
@@ -25,14 +25,15 @@ create index pnb_per_multi_geom_idx on fd94.pnb_per_multi using gist (geom);
 
 
 -- 3) recherche des divisions parfaites
-insert into fd94.pnb_per_multi (annee, nufe, nufs, surfe, surfs, typetxt, geom)
+insert into fd94.pnb_per_multi (annee, nufe, nufs, idufe_l, idufs_l, surfe, surfs, typetxt, geom)
 	select d.annee, 1 nufe, count(c.iduf) nufs, 
+		array[d.iduf] idufe_l, array_agg(c.iduf) idufs_l,
 		st_area(d.geom) surfe, st_area(st_union(st_accum(c.geom))) surfs, 'DIV',
 		st_union(st_accum(c.geom)) geom
 	from fd94.ufc c, fd94.ufd d
 	where st_contains(d.geom, c.geom) and
 		not st_equals(c.geom, d.geom) and c.annee=d.annee
-	group by d.annee, d.geom
+	group by d.annee, d.geom, d.iduf
 	having st_equals(d.geom, st_union(st_accum(c.geom)));
 
 -- 4) suppression des divisions parfaites dans les tables ufc et ufd
@@ -54,14 +55,15 @@ where iduf in (
 	);
 
 -- 5) recherche des fusions parfaites
-insert into fd94.pnb_per_multi (annee, nufe, nufs, surfe, surfs, typetxt, geom)
+insert into fd94.pnb_per_multi (annee, nufe, nufs, idufe_l, idufs_l, surfe, surfs, typetxt, geom)
 	select c.annee, count(c.iduf) nufe, 1 nufs, 
+		array_agg(d.iduf) idufe_l, array[c.iduf] idufs_l, 
 		st_area(st_union(st_accum(d.geom))) surfe, st_area(c.geom) surfe, 'FUS',
 		st_union(st_accum(d.geom)) geom
 	from fd94.ufc c, fd94.ufd d
 	where st_contains(c.geom, d.geom) and
 		not st_equals(c.geom, d.geom) and c.annee=d.annee
-	group by c.annee, c.geom
+	group by c.annee, c.geom, c.iduf
 	having st_equals(c.geom, st_union(st_accum(d.geom)));
 
 -- 6) suppression des fusions parfaites dans les tables ufc et ufd
@@ -170,6 +172,32 @@ from (
 	) foo
 where p.annee=foo.annee and 
 	p.geom=foo.geomp;
+
+
+-- autres opérations
+update fd94.pnb_per_multi p
+set nufs=foo.nufs, idufs_l=foo.idufs_l, typetxt='AUTRE',
+	surfs=cast(st_area(foo.geom) as int)
+from (
+	select p1.annee, p1.geom geomp, array_agg(c.iduf) idufs_l, count(c.iduf) nufs,
+		st_union(st_accum(c.geom)) geom
+	from fd94.pnb_per_multi p1, fd94.ufc c
+	where p1.annee=c.annee and st_contains(p1.geom, c.geom)
+	group by p1.geom, p1.annee
+	) foo
+where p.annee=foo.annee and p.geom=foo.geomp;
+
+update fd94.pnb_per_multi p
+set nufe=foo.nufe, idufe_l=foo.idufe_l, surfe=cast(st_area(foo.geom) as int)
+from (
+	select p1.annee, p1.geom geomp, array_agg(d.iduf) idufe_l, count(d.iduf) nufe,
+		st_union(st_accum(d.geom)) geom
+	from fd94.pnb_per_multi p1, fd94.ufd d
+	where p1.annee=d.annee and st_contains(p1.geom, d.geom)
+	group by p1.geom, p1.annee
+	) foo
+where p.annee=foo.annee and p.geom=foo.geomp;
+
 
 ----------------------------------------
 -- suppression des tables temporaires --

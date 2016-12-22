@@ -186,20 +186,20 @@ insert into fd94.usage_per_multi (
 
 update fd94.usage_per_multi p
 set
-npar_av=npar,
-nlocal_av=nlocal,
-nlocmaison_av=nlocmaison,
-nlocappt_av=nlocappt,
-nloclog_av=nloclog,
-nloccom_av=nloccom,
-nlocdep_av=nlocdep,
-npevph_av=npevph,
-stoth_av=stoth,
-npevp_av=npevp,
-stotp_av=stotp,
-npevd_av=npevd,
-stotd_av=stotd,
-spevtot_av=spevtot
+	npar_av=npar,
+	nlocal_av=nlocal,
+	nlocmaison_av=nlocmaison,
+	nlocappt_av=nlocappt,
+	nloclog_av=nloclog,
+	nloccom_av=nloccom,
+	nlocdep_av=nlocdep,
+	npevph_av=npevph,
+	stoth_av=stoth,
+	npevp_av=npevp,
+	stotp_av=stotp,
+	npevd_av=npevd,
+	stotd_av=stotd,
+	spevtot_av=spevtot
 from (
 	select
 		p.idper,
