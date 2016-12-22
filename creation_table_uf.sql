@@ -8,11 +8,13 @@ create table fd94.pnb_uf_2012 as
 		group by idprocpte
 		)
 	select
-		concat(max(idpar), count(idpar), cast(avg(st_area(geompar)) as int)) iduf,
+		concat(max(idpar),'+', 
+			count(idpar), '+',cast(avg(st_area(geompar)) as int)) iduf,
 		2012 annee,
 		max(idpar) idpar,
 		array_agg(idpar) idpar_l,	-- array des idpar constituant l'uf
 		count(idpar) npar,  		-- nombre de parcelles composant l'UF
+		cast(avg(st_area(geompar)) as int) surfm,	-- surface moyenne des parcelles uf
 		sum(nlocal) nlocal,
 		sum(nlocmaison) nlocmaison,
 		sum(nlocappt) nlocappt,
